@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MDZ SKYNET · Recuperos</title>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3.49.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css">
+<script src="https://cdn.jsdelivr.net/npm/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+<style>
+:root{--ac:#2da8ff;--bg:#151a23;--pn:#181e29;--bd:#263042;--tx:#e6edf6;--mu:#8da0b8}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:#1b212b;color:var(--tx);font:13px Inter,system-ui,sans-serif;padding:14px}
+.shell{height:100%;border:1.5px solid #3a5b85;border-radius:30px;background:linear-gradient(180deg,#4a5260,#2c3441 40%,#1f2631);display:flex;gap:14px;padding:14px;overflow:hidden}
+.rail{width:88px;background:#10151d;border-radius:24px;display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:10px;flex:none}
+.rb{width:60px;height:60px;border-radius:50%;border:0;background:transparent;color:#9fb0c6;font-size:22px;cursor:pointer;transition:.2s;position:relative}
+.rb:hover{background:#1a2230}.rb.on{background:var(--ac);color:#fff;box-shadow:0 0 22px var(--ac)}
+.rb:hover:after{content:attr(data-t);position:absolute;left:68px;top:18px;background:#0b0f15;border:1px solid var(--bd);padding:3px 9px;border-radius:8px;font-size:11px;white-space:nowrap;z-index:99;color:#fff}
+.main{flex:1;min-width:0;display:flex;flex-direction:column;gap:12px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:2px 6px}
+h1{margin:0;font-size:30px;font-weight:900;letter-spacing:-.5px}.sub{color:#b9c6d6;font-size:12px}
+.pill{background:#0d1219;border-radius:999px;padding:9px 16px;font-weight:700;font-size:12px;display:flex;gap:8px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px #22c55e}
+.body{flex:1;min-height:0;display:flex;gap:14px}
+.left{width:430px;flex:none;background:var(--pn);border-radius:24px;padding:20px;overflow:auto}
+.right{flex:1;min-width:0;border-radius:24px;padding:22px;overflow:auto;background:radial-gradient(700px 500px at 75% 35%,rgba(35,100,180,.45),transparent 70%),linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px) 0 0/52px 52px,linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px) 0 0/52px 52px,var(--bg)}
+h3{margin:0 0 12px;font-size:15px;font-weight:800}h2{margin:0 0 14px;font-size:22px;font-weight:800}
+.drop{border:2px dashed #3a4558;border-radius:18px;background:#1b212c;text-align:center;padding:30px 12px;cursor:pointer;transition:.2s;display:block}
+.drop:hover,.drop.hot{border-color:var(--ac);background:#1c2735}.drop b{color:var(--ac)}
+.in{width:100%;background:#10151d;border:1px solid var(--bd);color:var(--tx);border-radius:12px;padding:12px 14px;font-size:13px}
+.in:focus{outline:none;border-color:var(--ac)}
+.btn{width:100%;margin-top:10px;padding:13px;border-radius:12px;border:0;background:var(--ac);color:#fff;font-weight:800;cursor:pointer}
+.btn.g{background:#232d3d;color:#c8d6e8}
+.lbl{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;color:var(--mu);margin:10px 0 4px;text-transform:uppercase}
+.fl{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}
+.card{background:rgba(24,30,41,.85);border:1px solid var(--bd);border-radius:18px;padding:16px;backdrop-filter:blur(8px)}
+.grid{display:grid;gap:14px}.g2{grid-template-columns:repeat(auto-fit,minmax(min(460px,100%),1fr))}.g4{grid-template-columns:repeat(auto-fill,minmax(185px,1fr))}
+.k{border-radius:16px;padding:14px;background:rgba(24,30,41,.9);border:1px solid var(--bd);border-left:4px solid var(--c);transition:.2s}.k:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.k p{margin:0;font-size:10px;font-weight:800;color:var(--mu);text-transform:uppercase;letter-spacing:.06em}.k div{font-size:26px;font-weight:900;margin-top:4px;color:var(--c)}.k small{color:var(--mu);font-size:10px}
+.ct{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#cbd7e6;margin:0 0 8px}
+.map{height:max(760px,calc(100vh - 200px));border-radius:16px}.map:fullscreen{height:100vh!important;border-radius:0}.right{padding:16px}
+.chip{padding:7px 14px;border-radius:999px;border:1px solid var(--bd);background:#10151d;color:#cbd7e6;font-weight:700;font-size:11px;cursor:pointer;display:flex;align-items:center}.chip.on{background:var(--ac);color:#fff;border-color:transparent}
+table{width:100%;border-collapse:collapse;font-size:12px}th{position:sticky;top:0;background:#10151d;text-align:left;padding:9px;font-size:10px;letter-spacing:.06em;color:var(--mu);text-transform:uppercase}td{padding:8px 9px;border-bottom:1px solid #202a3a}tr:hover td{background:#1a2433}
+.bar{height:6px;border-radius:9px;background:#243044;overflow:hidden;min-width:70px}.bar i{display:block;height:100%;background:linear-gradient(90deg,#22c55e,#2da8ff)}
+.tag{padding:2px 8px;border-radius:999px;font-size:10px;font-weight:800}
+.empty{text-align:center;margin-top:12vh;color:var(--mu)}.empty h2{color:#c8d6e8;margin:8px 0 4px}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#10151d;color:#e6edf6}.leaflet-control-layers{background:#10151d;color:#e6edf6}
+.ds{margin:0 0 8px;color:var(--mu);font-size:11.5px;line-height:1.4}.card{min-width:0}.card>div{max-width:100%}.apexcharts-canvas{max-width:100%!important}.view{display:none}.view.on{display:block}
+@media(max-width:1000px){.body{flex-direction:column}.left{width:100%}.rail{width:60px}.rb{width:44px;height:44px}}
+
+/* --- CLASES DE ANIMACIÓN PARA EL MAPA --- */
+@keyframes bnk{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.4)}}
+.bnk{animation:bnk 1.5s infinite}
+.mrk{width:14px;height:14px;border-radius:50%;border:1.5px solid #fff;box-shadow:0 0 4px rgba(0,0,0,.5)}
+</style></head><body>
+<div class="shell">
+ <nav class="rail" id="rail"></nav>
+ <div class="main">
+  <div class="top"><div><h1>MDZ SKYNET</h1><div class="sub">Inteligencia de recuperos · GPS unificado / LOJACK / DETEKTOR</div></div><div class="pill"><span class="dot"></span>En línea</div></div>
+  <div class="body">
+   <aside class="left">
+    <h3>Cargar datos</h3>
+    <label class="drop" id="drop"><div style="font-size:30px">☁️</div><b>Haz clic para subir</b> o arrastra el archivo<div style="color:var(--mu);font-size:11px;margin-top:4px">Excel (.xlsx / .xls)</div><input type="file" id="xl" accept=".xlsx,.xls" hidden></label>
+    <p id="fname" style="color:var(--mu);font-size:11px;font-family:monospace;margin:8px 0 18px">Esperando archivo…</p>
+    <h3>Búsqueda universal</h3>
+    <input id="q" class="in" placeholder="Placa, zona, HILUX, GPS 360, ASALTO…">
+    <button class="btn" id="go">Buscar</button>
+    <p style="color:var(--mu);font-size:11px">Busca por placa, zona, marca, modelo, tecnología o cualquier dato. Combina varias palabras.</p>
+    <h3 style="margin-top:18px">Filtros <span id="cnt" style="float:right;color:var(--ac);font-size:11px"></span></h3>
+    <div class="fl" id="filters"></div>
+    <button class="btn g" id="reset">↻ Limpiar filtros y búsqueda</button>
+    <button class="btn g" id="exp">⬇ Exportar CSV filtrado</button>
+   </aside>
+   <section class="right" id="right">
+    <h2 id="vt">Resultados</h2>
+    <div id="empty" class="empty"><div style="font-size:70px;opacity:.35">🐙</div><h2>Esperando datos de SKYNET</h2>Sube tu archivo Excel para comenzar.</div>
+    <div id="views" style="display:none">
+     <div class="view" id="v_resumen"><div class="grid g4" id="kp"></div><h3 style="margin:18px 0 10px">Patrones detectados</h3><div class="grid g4" id="ins"></div><div class="grid g2" id="c_resumen" style="margin-top:14px"></div></div>
+     <div class="view" id="v_mapa"><div class="card"><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap" id="mb1"><span class="ct" style="margin:8px 12px 0 0">Mapa general · 🟢 recuperado 🔴 en proceso</span></div><div id="map1" class="map"></div><div id="ap1"></div></div></div>
+     <div class="view" id="v_gps"><div class="card"><div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap" id="mb2"><span class="ct" style="margin:8px 12px 0 0">Filtros de Tecnología en Mapa (estático = recuperado / parpadea = en proceso)</span></div>
+      <div style="display:grid;grid-template-columns:minmax(0,3fr) minmax(220px,1fr);gap:14px"><div id="map2" class="map"></div><div><div id="gv" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div><div id="gk" class="grid" style="grid-template-columns:repeat(3,1fr);gap:8px"></div><p class="ct" style="margin-top:14px">Subtipos · tasa de recupero</p><div id="gs"></div></div></div><div id="ap2"></div></div></div>
+     <div class="view" id="v_tec"><div class="grid g2" id="c_tec"></div></div>
+     <div class="view" id="v_tiempos"><div class="grid g2" id="c_tiempos"></div></div>
+     <div class="view" id="v_zonas"><div class="card"><p class="ct">Índice de riesgo por zona (60% volumen + 40% casos abiertos)</p><div style="max-height:380px;overflow:auto"><table id="zt"></table></div></div><div class="grid g2" id="c_zonas" style="margin-top:14px"></div></div>
+     <div class="view" id="v_veh"><div class="grid g2" id="c_veh"></div></div>
+     <div class="view" id="v_datos"><div class="card"><p class="ct" id="dt">Registros</p><div style="max-height:calc(100vh - 280px);overflow:auto"><table id="tb"></table></div></div></div>
+    </div>
+   </section>
+  </div>
+ </div>
+</div>
+<script>
+window.addEventListener('error',e=>{const f=document.getElementById('fname');if(f)f.textContent='❌ '+e.message+' (línea '+e.lineno+')'});
+const $=id=>document.getElementById(id),C0=[-12.0464,-77.0428],DAYS=['DOM','LUN','MAR','MIÉ','JUE','VIE','SÁB'];
+const clean=v=>v==null?'':String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/\s+/g,' ').trim();
+const SUBC={'GPS BASE':'#22d3ee','GPS-PP':'#a78bfa','GPS 360':'#f59e0b','HUNTER PRO':'#f43f5e','GPS AMI':'#10b981','PP SECURITY':'#ec4899','HUNTER TOYOTA':'#3b82f6'};
+const CLSC={GPS:'#22d3ee',LOJACK:'#f59e0b',DETEKTOR:'#a78bfa',OTROS:'#64748b'};
+const D={'SAN MARTIN DE PORRES':[-12.0135,-77.0586],'VILLA EL SALVADOR':[-12.2154,-76.9351],'SAN JUAN DE MIRAFLORES':[-12.1646,-76.9691],'VILLA MARIA DEL TRIUNFO':[-12.1578,-76.9272],'LOS OLIVOS':[-11.9877,-77.0732],'CALLAO':[-12.0566,-77.1181],'VENTANILLA':[-11.8756,-77.1264],'CARABAYLLO':[-11.8894,-77.0244],'COMAS':[-11.9353,-77.0531],'ATE':[-12.0241,-76.9142],'PUENTE PIEDRA':[-11.8647,-77.0778],'SANTIAGO DE SURCO':[-12.1436,-76.9916],'SURCO':[-12.1436,-76.9916],'MIRAFLORES':[-12.1111,-77.0315],'CERCADO DE LIMA':[-12.0464,-77.0428],'SAN JUAN DE LURIGANCHO':[-11.9847,-76.9931],'SAN BORJA':[-12.1091,-76.9984],'LA VICTORIA':[-12.0722,-77.0231],'SURQUILLO':[-12.1189,-77.0175],'BARRANCO':[-12.1456,-77.0219],'CHORRILLOS':[-12.1764,-77.0125],'LA MOLINA':[-12.0833,-76.95],'SAN MIGUEL':[-12.0775,-77.0914],'MAGDALENA':[-12.0914,-77.0708],'JESUS MARIA':[-12.0733,-77.0456],'LINCE':[-12.085,-77.0342],'BRENA':[-12.0583,-77.0528],'PUEBLO LIBRE':[-12.0775,-77.0622],'INDEPENDENCIA':[-11.9931,-77.0506],'RIMAC':[-12.0303,-77.0281],'EL AGUSTINO':[-12.0447,-76.9969],'SANTA ANITA':[-12.0453,-76.9714],'SAN LUIS':[-12.0764,-76.9972],'LURIN':[-12.2753,-76.8706],'CHACLACAYO':[-11.9767,-76.7683],'LURIGANCHO':[-11.9453,-76.7003],'SAN ISIDRO':[-12.0977,-77.0365],'PACHACAMAC':[-12.2285,-76.8615],'CIENEGUILLA':[-12.1178,-76.8133],'ANCON':[-11.7738,-77.175],'SANTA ROSA':[-11.8,-77.17],'SAN BARTOLO':[-12.3833,-76.7833],'LIMA':[-12.0464,-77.0428],'ICA':[-14.0638,-75.7430]};
+const DK=Object.keys(D).sort((a,b)=>b.length-a.length),DR=DK.map(k=>[k,new RegExp('(^| )'+k+'( |$)')]),dkey=z=>!z?null:D[z]?z:(DR.find(x=>x[1].test(z))||[])[0]||null;
+let seed=7;const rnd=()=>(seed=(seed*9301+49297)%233280)/233280;
+const geo=z=>{const k=dkey(z);return k?[D[k][0]+(rnd()-.5)*.014,D[k][1]+(rnd()-.5)*.014]:null};
+
+/* ---------- parsers ---------- */
+function pDate(v){if(v==null||v==='')return null;if(v instanceof Date)return v;if(typeof v==='number'&&v>1){const p=XLSX.SSF.parse_date_code(v);return p?new Date(p.y,p.m-1,p.d):null}
+ const m=String(v).match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})/);if(m){let y=+m[3];if(y<100)y+=2000;return new Date(y,m[2]-1,+m[1])}return null}
+function pHour(v){if(v==null||v==='')return null;if(typeof v==='number')return v<1?Math.floor(v*24):v>1?Math.floor((v%1)*24):null;const m=String(v).match(/(\d{1,2})(?::(\d{2}))?\s*(AM|PM)?/i);if(!m)return null;let h=+m[1];const a=(m[3]||'').toUpperCase();if(a==='PM'&&h<12)h+=12;if(a==='AM'&&h===12)h=0;return h<24?h:null}
+function pDiff(v){const t=clean(v);if(!t||t==='-')return null;let m=0,x;if(x=t.match(/(\d+)\s*D/))m+=x[1]*1440;if(x=t.match(/(\d+)\s*H/))m+=x[1]*60;if(x=t.match(/(\d+)\s*M/))m+=+x[1];return m||null}
+function devInfo(d){const t=clean(d);if(!t||/^[%\d]+$/.test(t))return{cls:'',tags:[]};const gps=/GPS|HUNTER|PP|AMI|360/.test(t),lj=/LOJACK|VLU/.test(t),dk=/DETEK/.test(t),tags=[];
+ if(gps){if(/PP SECURITY|PP-SECURITY|PP- SECURITY/.test(t))tags.push('PP SECURITY');if(/GPS-PP|GPS PP|GPS-GPS PP/.test(t))tags.push('GPS-PP');if(/360/.test(t))tags.push('GPS 360');if(/AMI/.test(t))tags.push('GPS AMI');if(/HUNTER PRO/.test(t))tags.push('HUNTER PRO');if(/HUNTER TOYOTA/.test(t))tags.push('HUNTER TOYOTA');if(!tags.length)tags.push('GPS BASE')}
+ return{cls:gps?'GPS':lj?'LOJACK':dk?'DETEKTOR':'OTROS',tags,hybrid:gps&&(lj||dk),gl:gps&&lj,gd:gps&&dk}}
+const COLS={n:['N°','N° DE OP.'],date:['FECHA','FECHA DE ROBO'],hour:['HORA DE DENUNCIA A HUNTER','HORA DE DENUNCIA'],diff:['DIFERENCIA HORA DE ROBO Y DENUNCIA'],type:['TIPO'],brand:['MARCA'],model:['MODELO'],mod:['MODALIDAD DE ROBO','MODALIDAD'],ins:['ASEGURADORA'],dev:['DISPOSITIVO'],zone:['LUGAR DE ROBO','DISTRITO'],status:['STATUS DE RECUPERO'],devst:['ESTADO DEL DISPOSITIVO'],plate:['PLACA'],reconf:['RECONFIRMADO'],taxi:['TAXI'],trec:['TIEMPO DE RECUPERO'],lrec:['LUGAR DE RECUPERO'],obs:['OBSERVACION'],vlu:['VLU'],owner:['PROPIETARIO']};
+let DATA=[],Q='',CUR='resumen',F={d:[],g:[]};
+
+function load(file){$('fname').textContent='Procesando '+file.name+'…';DATA=[];seed=7;const r=new FileReader();r.onload=e=>{try{
+ const wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+ wb.SheetNames.forEach(sn=>{const mx=XLSX.utils.sheet_to_json(wb.Sheets[sn],{header:1,defval:'',raw:true});
+  const hi=mx.slice(0,25).findIndex(r=>{const t=r.map(clean).join('|');return t.includes('STATUS DE RECUPERO')&&t.includes('DISPOSITIVO')});if(hi<0)return;
+  const H=mx[hi].map(clean),ix={};for(const k in COLS){ix[k]=H.findIndex(h=>COLS[k].includes(h));if(ix[k]<0)ix[k]=H.findIndex(h=>h&&COLS[k].some(c=>h.startsWith(c)))}
+  for(let i=hi+1;i<mx.length;i++){const w=mx[i],g=k=>ix[k]>=0?w[ix[k]]:'';if(ix.n>=0&&!(parseFloat(g('n'))>0))continue;
+   const st=clean(g('status')),z0=clean(g('zone')).split('-')[0].replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim(),kz=dkey(z0),zone=kz?(kz==='SURCO'?'SANTIAGO DE SURCO':kz==='LIMA'?'CERCADO DE LIMA':kz):z0;if(!st&&!zone)continue;const di=devInfo(g('dev'));
+   const o={month:sn.toUpperCase().trim(),status:st,recovered:/^SI$|RECUPER/.test(st)&&!/^NO/.test(st),zone,type:clean(g('type')),brand:clean(g('brand')),model:clean(g('model')),mod:clean(g('mod')),ins:clean(g('ins')),devRaw:clean(g('dev')),...di,devst:clean(g('devst')),plate:clean(g('plate')),date:pDate(g('date')),hour:pHour(g('hour')),diff:pDiff(g('diff')),diffTxt:g('diff'),trec:pDiff(g('trec')),lrec:clean(g('lrec')),reconf:/^SI/.test(clean(g('reconf'))),taxi:/^SI/.test(clean(g('taxi'))),obs:clean(g('obs')),owner:clean(g('owner')),coords:geo(zone)};
+   o.h=[o.plate,o.month,o.zone,o.type,o.brand,o.model,o.mod,o.ins,o.devRaw,o.cls,o.tags.join(' '),o.devst,o.status,o.obs,o.lrec,o.owner].join(' ');DATA.push(o)}});
+ if(!DATA.length){$('fname').textContent='⚠ Sin registros válidos';return}
+ $('fname').textContent=`✓ ${file.name} · ${DATA.length.toLocaleString()} registros`;$('empty').style.display='none';$('views').style.display='block';buildFilters();go(CUR)}catch(err){console.error(err);$('fname').textContent='❌ '+err.message}};r.readAsArrayBuffer(file)}
+$('xl').onchange=e=>e.target.files[0]&&load(e.target.files[0]);
+const dz=$('drop');['dragover','dragenter'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.add('hot')}));['dragleave','drop'].forEach(v=>dz.addEventListener(v,e=>{e.preventDefault();dz.classList.remove('hot')}));dz.addEventListener('drop',e=>e.dataTransfer.files[0]&&load(e.dataTransfer.files[0]));
+
+/* ---------- filtros / búsqueda ---------- */
+const FL=[['mes','Mes',r=>[r.month]],['est','Estado',r=>[r.recovered?'RECUPERADO':'EN PROCESO']],['zona','Zona',r=>[r.zone]],['mod','Modalidad',r=>[r.mod]],['cls','Tecnología',r=>[r.cls]],['sub','Subtipo GPS',r=>r.tags],['tipo','Tipo',r=>[r.type]],['ins','Aseguradora',r=>[r.ins]],['marca','Marca',r=>[r.brand]],['comb','Combinación',r=>[r.gl?'GPS + LOJACK':r.gd?'GPS + DETEKTOR':r.cls==='GPS'?'SOLO GPS':r.cls||'']],['rec','Reconfirmado',r=>[r.reconf?'SI':'NO']]];
+function buildFilters(){$('filters').innerHTML=FL.map(([id,l,f])=>{let v=id==='mes'?[...new Set(DATA.map(r=>r.month))]:[...new Set(DATA.flatMap(f).filter(Boolean))].sort();return`<div><label class="lbl">${l}</label><select id="f_${id}" class="in" style="padding:8px"><option>TODOS</option>${v.map(x=>`<option>${x}</option>`).join('')}</select></div>`}).join('');FL.forEach(([id])=>$('f_'+id).onchange=()=>go(CUR))}
+function filt(){const t=clean(Q).split(' ').filter(Boolean);return DATA.filter(r=>FL.every(([id,,f])=>{const v=$('f_'+id).value;return v==='TODOS'||f(r).includes(v)})&&t.every(x=>r.h.includes(x)))}
+$('go').onclick=()=>{Q=$('q').value;go('datos')};$('q').addEventListener('keydown',e=>{if(e.key==='Enter')$('go').click()});
+$('reset').onclick=()=>{Q='';$('q').value='';FL.forEach(([id])=>$('f_'+id)&&($('f_'+id).value='TODOS'));go(CUR)};
+$('exp').onclick=()=>{const d=filt();if(!d.length)return;const csv=[['Mes','Estado','Zona','Tipo','Marca','Modelo','Placa','Modalidad','Aseguradora','Dispositivo','Hora','Demora'],...d.map(r=>[r.month,r.status,r.zone,r.type,r.brand,r.model,r.plate,r.mod,r.ins,r.devRaw,r.hour??'',r.diffTxt])].map(x=>x.map(c=>`"${c}"`).join(',')).join('\n');const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['\ufeff'+csv],{type:'text/csv'}));a.download='recuperos_filtrado.csv';a.click()};
+
+/* ---------- utilidades ---------- */
+const count=(rows,f)=>{const o={};rows.forEach(r=>[].concat(f(r)).forEach(k=>{if(k)o[k]=(o[k]||0)+1}));return o};
+const topN=(o,n=10)=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,n),pct=(a,b)=>b?+(a/b*100).toFixed(1):0;
+const med=a=>{if(!a.length)return null;a=[...a].sort((x,y)=>x-y);return a[Math.floor(a.length/2)]};
+const fmtM=m=>m==null?'--':m<60?m+' min':m<1440?(m/60).toFixed(1)+' h':(m/1440).toFixed(1)+' d';
+
+/* ---------- mapas ---------- */
+function mkMap(id,box){const m=L.map(id,{preferCanvas:true}).setView(C0,11);
+ const ES='https://server.arcgisonline.com/ArcGIS/rest/services/',T=(u,o={})=>L.tileLayer(ES+u+'/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Tiles © Esri',...o});
+ const dk=T('Canvas/World_Dark_Gray_Base',{maxNativeZoom:16}),st=T('World_Street_Map'),sat=T('World_Imagery'),osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'});
+ dk.addTo(m);L.control.layers({'Oscuro':dk,'Calles':st,'Satélite':sat,'OpenStreetMap':osm}).addTo(m);
+ let er=0;dk.on('tileerror',()=>{if(++er===4){m.removeLayer(dk);st.addTo(m)}});
+ const M={m,mode:'clusters',pts:[],cur:null,L:{clusters:L.markerClusterGroup(),points:L.layerGroup(),heat:L.layerGroup(),zones:L.layerGroup()}};
+ [['clusters','Clusters'],['heat','Calor'],['zones','Geocercas'],['points','Puntos']].forEach(([k,l])=>{const b=document.createElement('button');b.className='chip'+(k==='clusters'?' on':'');b.textContent=l;b.onclick=()=>{M.mode=k;box.querySelectorAll('.chip').forEach(x=>x.classList.remove('on'));b.classList.add('on');showL(M)};box.appendChild(b)});const fb=document.createElement('button');fb.className='chip';fb.textContent='⛶ Pantalla completa';fb.onclick=()=>{const el=m.getContainer();document.fullscreenElement?document.exitFullscreen():el.requestFullscreen()};box.appendChild(fb);const ab=document.createElement('button');ab.className='chip'+(ANT.on?' on':'');ab.dataset.ant=1;ab.textContent='📡 Activar posicionamiento de antenas';ab.style.marginLeft='auto';ab.onclick=()=>{ANT.on=!ANT.on;document.querySelectorAll('[data-ant]').forEach(x=>{x.classList.toggle('on',ANT.on);x.textContent=ANT.on?'📡 Antenas activas · desactivar':'📡 Activar posicionamiento de antenas'});antRe()};box.appendChild(ab);return M}
+const showL=M=>{if(M.cur)M.m.removeLayer(M.cur);M.cur=M.L[M.mode];M.m.addLayer(M.cur)};
+const fit=M=>setTimeout(()=>{M.m.invalidateSize();M.pts.length&&M.m.fitBounds(M.pts,{padding:[30,30],maxZoom:13})},80);
+const popup=r=>`<div style="min-width:220px"><b style="font-size:14px">${r.plate||'INCIDENTE'}</b><hr style="border-color:#263042"><b>${r.recovered?'🟢 RECUPERADO':'🔴 EN PROCESO'}</b><br>📍 ${r.zone||'-'}<br>🚗 ${r.type} ${r.brand} ${r.model}<br>📡 ${r.devRaw||'-'} ${r.devst?'· '+r.devst:''}<br>⚠ ${r.mod||'-'}<br>🏢 ${r.ins||'-'}<br>🕒 ${r.hour!=null?String(r.hour).padStart(2,'0')+'h':'-'} · demora ${r.diffTxt||'-'}<br>📅 ${r.month}</div>`;
+function draw(M,rows,color){if(!window.L||!M.m.addLayer)return;M.rows=rows;Object.values(M.L).forEach(l=>l.clearLayers());M.pts=[];
+ rows.forEach(r=>{if(!r.coords)return;M.pts.push(r.coords);const c=color(r);
+  const ic=L.divIcon({className:'',html:`<div class="mrk ${r.recovered?'':'bnk'}" style="background:${c}"></div>`,iconSize:[14,14],iconAnchor:[7,7]});
+  M.L.points.addLayer(L.marker(r.coords,{icon:ic}).bindPopup(popup(r)));
+  M.L.clusters.addLayer(L.marker(r.coords,{icon:ic}).bindPopup(popup(r)));
+ });
+ if(M.pts.length)M.L.heat.addLayer(L.heatLayer(rows.filter(r=>r.coords).map(r=>[...r.coords,r.recovered?.5:1]),{radius:30,blur:22,maxZoom:15}));
+ const z={};rows.forEach(r=>{const k=dkey(r.zone);if(!k)return;z[k]=z[k]||{t:0,r:0};z[k].t++;r.recovered&&z[k].r++});
+ Object.entries(z).forEach(([k,v])=>{const c=v.t-v.r>v.r?'#ef4444':'#10b981';L.circle(D[k],{radius:Math.max(700,Math.sqrt(v.t)*450),color:c,weight:2,dashArray:'5 5',fillColor:c,fillOpacity:.28}).bindPopup(`<b>GEOCERCA ${k}</b><br>Total <b>${v.t}</b> · Recup. <b>${v.r}</b> · Abiertos <b>${v.t-v.r}</b><br>Recupero <b>${pct(v.r,v.t)}%</b>`).addTo(M.L.zones)});showL(M);fit(M);drawAnt(M)}
+let M1,M2;document.addEventListener('fullscreenchange',()=>setTimeout(()=>[M1,M2].forEach(x=>x&&x.m&&x.m.invalidateSize&&x.m.invalidateSize()),250));
+const ANTS=[["LIMA-50 COMAS", -11.978766, -77.055145, true], ["LIMA-AGUSTINO", -12.052558, -77.002939, true], ["LIMA-ASIA", -12.758869, -76.599119, true], ["LIMA-AZUL", -12.071361, -76.990031, true], ["LIMA-BARRANCA", -10.747631, -77.7489468, true], ["LIMA-BASE", -12.1109345, -77.0105818, true], ["LIMA-CARABAYLLO", -11.888173, -77.02018, true], ["LIMA-CHANCAY", -11.5637175, -77.2661747, true], ["LIMA-CHOSICA", -11.920214, -76.6723345, true], ["LIMA-COLLIQUE", -11.913601, -77.017197, true], ["LIMA-CONDOR", -12.002355, -77.007545, true], ["LIMA-CONDOR2", -11.923123, -76.959846, true], ["LIMA-CONDOR3", -11.961157, -76.993988, true], ["LIMA-CRUZADO", -11.998882, -77.117584, true], ["LIMA-HUACHO", -11.115469, -77.589005, true], ["LIMA-HUAMPANI GOLF", -11.968006, -76.794806, true], ["LIMA-HUAYCAN", -12.022996, -76.809456, true], ["LIMA-IMPERIAL CAÑETE", -13.0735963, -76.3824983, true], ["LIMA-IMPERIO", -12.047952, -77.037048, true], ["LIMA-IZQUIERDO", -12.052444, -77.106804, true], ["LIMA-LA MILLA", -12.019158, -77.068718, true], ["LIMA-LA QUIPA", -12.460859, -76.7711807, true], ["LIMA-LOMAS", -11.866154, -77.019417, true], ["LIMA-LURIN", -12.26578, -76.880898, true], ["LIMA-MARQUEZ", -11.943325, -77.131706, true], ["LIMA-MARRON", -12.14019, -76.979095, true], ["LIMA-MARTIN", -11.98637, -77.084351, true], ["LIMA-MIRONES", -12.068061, -77.073794, true], ["LIMA-MUSA", -12.0876695, -76.88352, true], ["LIMA-NUEVO AMANECER", -11.912615, -77.088496, true], ["LIMA-ORO", -12.08059, -77.03278, true], ["LIMA-PACHA", -12.016497, -76.900369, true], ["LIMA-PACHA2", -11.982558, -76.942978, true], ["LIMA-PACHA3", -11.972806, -76.895241, true], ["LIMA-PACHACAMAC", -12.22031, -76.88703, true], ["LIMA-PACIFICO", -11.933568, -77.04277, true], ["LIMA-PANTANO", -12.1902598, -77.0210615, true], ["LIMA-PATIVILCA", -10.6697563, -77.7938537, true], ["LIMA-PURUCHUCO", -12.051528, -76.929319, true], ["LIMA-REAL", -11.7787995, -77.1718517, true], ["LIMA-SALVADOR", -12.2070397, -76.9283685, true], ["LIMA-SAN DIEGO", -11.962152, -77.086731, true], ["LIMA-SANTA ANITA", -12.035794, -76.958587, true], ["LIMA-SARITA", -12.024988, -77.129761, true], ["LIMA-SATELITE", -11.865164, -77.131119, true], ["LIMA-TRAPICHE", -11.90327, -77.053123, true], ["LIMA-VALLE", -11.975478, -77.120926, true], ["LIMA-VERDE", -12.184914, -76.95298, true], ["LIMA-VERDE 2", -12.233266, -76.90947, true], ["LIMA-VIOLETA", -11.8652745, -77.0604212, true], ["LIMA-VIOLETA2", -11.8319555, -77.1057242, true], ["P-ANCASH-CASMA", -9.469869, -78.313239, false], ["P-ANCASH-CHIMBOTE", -9.064083, -78.588281, false], ["P-ANCASH-HUARAZ", -9.540831, -77.5218, false], ["P-ANCASH-NUEVO CHIMBOTE", -9.109019, -78.539467, false], ["P-AREQUIPA-AREQUIPA PUNO", -16.343008, -71.583536, false], ["P-AREQUIPA-AREQUIPA SUR", -16.528511, -71.780739, false], ["P-AREQUIPA-ATICO", -16.228669, -73.614769, false], ["P-AYACUCHO-AYACUCHO", -13.160269, -74.238114, false], ["P-HUANUCO-HUANUCO", -9.953228, -76.250367, false], ["P-ICA-CHINCHA", -13.40825, -76.130075, false], ["P-ICA-ICA", -14.063844, -75.742997, false], ["P-ICA-SAN CLEMENTE", -13.682914, -76.158203, false], ["P-JUNIN-LA OROYA", -11.52478, -75.91187, false], ["P-LA LIBERTAD-SALAVERRY", -8.186675, -78.982333, false], ["P-LA LIBERTAD-CHAO", -8.539122, -78.674939, false], ["P-LA LIBERTAD-PACASMAYO", -7.30336, -79.47665, false], ["P-LAMBAYEQUE-CHICLAYO 1", -6.749442, -79.869142, false], ["P-MOQUEGUA-MOQUEGUA", -17.170728, -70.90755, false], ["P-PIURA SAN PABLO", -5.2921715, -80.6184025, false], ["P-PIURA-PIURA CENTRO", -5.200267, -80.621594, false], ["P-PUNO-PUNO", -15.841718, -70.033089, false], ["P-PUNO-JULIACA", -15.495431, -70.158875, false], ["P-TACNA-TACNA", -17.996256, -70.260403, false], ["P-TRUJILLO NORTE", -8.015789, -79.067836, false], ["P-TRUJILLO-PORVENIR", -8.0861568, -78.9937905, false], ["P-TRUJILLO-CENTRO", -8.121236, -79.02115, false], ["P-TUMBES-TUMBES", -3.573092, -80.456753, false]];
+const ANT={on:false,r:8,reg:'ALL'};
+const hav=(a,b,c,d)=>{const t=x=>x*Math.PI/180,q=Math.sin(t(c-a)/2)**2+Math.cos(t(a))*Math.cos(t(c))*Math.sin(t(d-b)/2)**2;return 12742*Math.asin(Math.sqrt(q))};
+window.ANTF=(i,la,lo)=>(i==1?M1:M2).m.flyTo([la,lo],12);
+function antRe(){[M1,M2].forEach(x=>x&&x.rows&&drawAnt(x))}
+function drawAnt(M){if(!window.L||!M.m.addLayer)return;if(M.ant)M.m.removeLayer(M.ant);M.ant=null;const P=M.ap;if(!ANT.on||!M.rows){if(P)P.innerHTML='';return}
+ M.ant=L.layerGroup().addTo(M.m);const id=M===M1?1:2,R=ANT.r,A=ANTS.filter(a=>ANT.reg==='ALL'||(ANT.reg==='LIMA')===a[3]),rows=M.rows.filter(r=>r.coords);
+ const S=A.map(a=>{const z={};let t=0,rc=0,g=0;rows.forEach(r=>{if(hav(a[1],a[2],r.coords[0],r.coords[1])<=R){t++;r.recovered&&rc++;r.cls==='GPS'&&g++;z[r.zone]=(z[r.zone]||0)+1}});return{a,t,rc,g,z}});
+ const H={};rows.forEach(r=>{const k=dkey(r.zone);if(!k)return;const h=H[k]=H[k]||{k,t:0,o:0};h.t++;r.recovered||h.o++});
+ const HL=Object.values(H).sort((x,y)=>y.t-x.t).map(h=>{const c=D[h.k];return{...h,c,n:A.map(a=>[a,hav(c[0],c[1],a[1],a[2])]).sort((x,y)=>x[1]-y[1]).slice(0,3)}});
+ const mx=Math.max(...S.map(s=>s.t),1),col=s=>s.t>=.66*mx?'#ef4444':s.t>=.33*mx?'#f59e0b':s.t>0?'#22c55e':'#64748b';
+ S.forEach(s=>{const[a]=[s.a],c=col(s),nh=HL.map(h=>[h.k,hav(a[1],a[2],h.c[0],h.c[1])]).sort((x,y)=>x[1]-y[1])[0],tz=Object.entries(s.z).sort((x,y)=>y[1]-x[1]).slice(0,3).map(x=>x[0]+' ('+x[1]+')').join(', ');
+  L.circle([a[1],a[2]],{radius:R*1000,color:c,weight:1,fillColor:c,fillOpacity:.07}).addTo(M.ant);
+  L.marker([a[1],a[2]],{icon:L.divIcon({className:'',html:`<div style="font-size:22px;filter:drop-shadow(0 0 5px ${c})">📡</div>`,iconSize:[24,24],iconAnchor:[12,12]})}).bindTooltip(a[0]).bindPopup(`<div style="min-width:230px"><b style="font-size:14px">📡 ${a[0]}</b><hr style="border-color:#263042"><b>${a[3]?'Lima':'Provincia'}</b> · ${a[1].toFixed(5)}, ${a[2].toFixed(5)}<br>Radio: <b>${R} km</b><br>Incidentes en radio: <b>${s.t}</b> (🟢 ${s.rc} · 🔴 ${s.t-s.rc})<br>Con GPS: <b>${s.g}</b> · Recupero: <b>${pct(s.rc,s.t)}%</b><br>Foco más cercano: <b>${nh?nh[0]+' · '+nh[1].toFixed(1)+' km':'-'}</b><br>Zonas en radio: ${tz||'ninguna'}</div>`).addTo(M.ant)});
+ HL.slice(0,10).forEach(h=>{const[a,d]=h.n[0];L.polyline([h.c,[a[1],a[2]]],{color:'#fbbf24',weight:2,dashArray:'6 6'}).bindTooltip(`${h.k} → ${a[0]} · ${d.toFixed(1)} km`).addTo(M.ant);L.circleMarker(h.c,{radius:6+Math.sqrt(h.t),color:'#fff',weight:2,fillColor:'#ef4444',fillOpacity:.85}).bindTooltip(`FOCO ${h.k}: ${h.t} casos`).addTo(M.ant)});
+ const md=rows.map(r=>Math.min(...A.map(a=>hav(a[1],a[2],r.coords[0],r.coords[1])))),cov=md.filter(x=>x<=R).length,dm=med(md.map(x=>+x.toFixed(2))),unc=HL.filter(h=>h.n[0][1]>R),top1=[...S].sort((x,y)=>y.t-x.t)[0],idle=S.filter(s=>!s.t).length;
+ const K=(l,v,c)=>`<div class="k" style="--c:${c};padding:10px"><p>${l}</p><div style="font-size:19px">${v}</div></div>`,rk=[...S].sort((x,y)=>y.t-x.t).slice(0,15);
+ const td=h=>h.n.map(([a,d])=>`<td>${a[0].replace('LIMA-','')}<br><small style="color:${d<=R?'#22c55e':'#ef4444'}">${d.toFixed(1)} km</small></td>`).join('');
+ P.innerHTML=`<div class="card" style="margin-top:14px"><div style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;margin-bottom:12px"><b>📡 Análisis de antenas</b><label class="lbl" style="margin:0">Radio de cobertura: <b id="rv${id}" style="color:var(--ac)">${R} km</b> <input type="range" min="1" max="40" value="${R}" oninput="document.getElementById('rv${id}').textContent=this.value+' km'" onchange="ANT.r=+this.value;antRe()" style="vertical-align:middle"></label><label class="lbl" style="margin:0">Región <select class="in" style="width:auto;padding:6px" onchange="ANT.reg=this.value;antRe()">${[['ALL','Todas'],['LIMA','Solo Lima'],['PROV','Solo provincias']].map(([v,l])=>`<option value="${v}" ${ANT.reg===v?'selected':''}>${l}</option>`).join('')}</select></label><small style="color:var(--mu)">Distancias aproximadas: los incidentes se ubican por distrito, no por coordenada exacta.</small></div>
+ <div class="grid g4" style="grid-template-columns:repeat(auto-fill,minmax(150px,1fr));margin-bottom:14px">${K('Antenas activas',A.length,'#2da8ff')}${K('Con incidentes en radio',A.length-idle,'#22c55e')}${K('Sin incidentes',idle,'#64748b')}${K('Incidentes cubiertos',pct(cov,rows.length)+'%','#10b981')}${K('Dist. mediana incidente→antena',(dm??0)+' km','#06b6d4')}${K('Focos sin cobertura',unc.length,'#ef4444')}${K('Antena más cargada',top1&&top1.t?top1.a[0].replace('LIMA-','')+' · '+top1.t:'--','#f59e0b')}</div>
+ <div class="grid g2"><div><p class="ct">Focos de robo → 3 antenas más próximas (clic para ir)</p><div style="max-height:380px;overflow:auto"><table><tr><th>Foco</th><th>Casos</th><th>Abiertos</th><th>Antena 1</th><th>Antena 2</th><th>Antena 3</th><th>Cob.</th></tr>${HL.slice(0,25).map(h=>`<tr style="cursor:pointer" onclick="ANTF(${id},${h.c[0]},${h.c[1]})"><td><b>${h.k}</b></td><td>${h.t}</td><td>${h.o}</td>${td(h)}<td>${h.n[0][1]<=R?'✅':'❌'}</td></tr>`).join('')}</table></div></div>
+ <div><p class="ct">Ranking de antenas por incidentes en radio</p><div style="max-height:380px;overflow:auto"><table><tr><th>#</th><th>Antena</th><th>Inc.</th><th>Recup.</th><th>Abiertos</th><th>GPS</th><th>Zona principal</th></tr>${rk.map((s,i)=>`<tr style="cursor:pointer" onclick="ANTF(${id},${s.a[1]},${s.a[2]})"><td>${i+1}</td><td><b>${s.a[0]}</b></td><td><div class="bar"><i style="width:${pct(s.t,mx)}\%"></i></div>${s.t}</td><td>${s.rc}</td><td>${s.t-s.rc}</td><td>${s.g}</td><td>${Object.entries(s.z).sort((x,y)=>y[1]-x[1])[0]?.[0]||'-'}</td></tr>`).join('')}</table></div></div></div></div>`}
+
+
+/* ---------- gráficos ---------- */
+const DESC={"trend": "Casos por periodo (día o mes, según el rango de fechas). La línea celeste muestra cuántos de ellos tenían GPS.", "st": "Proporción de casos ya recuperados frente a los que siguen en proceso.", "cls": "Reparto de los casos según la tecnología instalada. GPS agrupa GPS, PP, 360, AMI, Hunter Pro y PP Security.", "rcls": "De cada 100 casos de una tecnología, cuántos se recuperaron. Compara la efectividad entre GPS, LOJACK y DETEKTOR.", "sub": "Cuántos casos hay en cada variante de GPS. Un caso con varias variantes cuenta en cada una.", "rsub": "Porcentaje de recupero por variante de GPS (solo variantes con 2 o más casos).", "open": "Tecnologías que tienen casos todavía sin recuperar. Muestra dónde se concentra el trabajo pendiente.", "devst": "Condición del dispositivo GPS al momento del robo (por ejemplo, no actualiza o no reporta).", "devall": "Condición del dispositivo en todas las tecnologías, no solo GPS.", "cm": "Casos de cada mes divididos por tecnología. Sirve para ver cómo cambia la mezcla con el tiempo.", "dz": "Distritos con más robos de vehículos que tenían GPS.", "raw": "Dispositivos tal como están escritos en el Excel, sin agrupar. Útil para detectar combinaciones.", "t2": "Evolución de los incidentes a lo largo del tiempo.", "hr": "Hora en que se denunció el robo a Hunter. La serie clara es la parte de esos casos que tenía GPS.", "dy": "Casos por día de la semana. Muestra qué días se concentran más los robos.", "mx": "Cruce de día de la semana y hora. Mientras más rojo, más casos en esa combinación.", "df": "Tiempo entre el robo y la denuncia a Hunter. Mientras antes se denuncia, mejores son las opciones de recupero.", "tc": "Tiempo que pasó desde la denuncia hasta recuperar el vehículo (solo casos con ese dato).", "fr": "Casos por franja: madrugada 0-5 h, mañana 6-11 h, tarde 12-17 h y noche 18-23 h.", "mr": "Porcentaje de casos recuperados en cada mes del archivo.", "zs": "Las 10 zonas con más casos, separando recuperados y en proceso.", "zr": "Porcentaje de recupero por zona (zonas con al menos 3 casos). Más alto es mejor.", "lr": "Lugares donde se encontraron los vehículos recuperados.", "zm": "Zonas con más robos bajo la modalidad de asalto a mano armada.", "md": "Modelos de vehículo con más robos.", "br": "Marcas con más robos.", "rm": "Porcentaje de recupero por marca (marcas con al menos 5 casos).", "ty": "Reparto de los robos por tipo de vehículo (pick up, sedán, camión, etc.).", "mo": "Cómo se cometieron los robos (asalto, hurto, etc.).", "rmo": "Porcentaje de recupero según la modalidad del robo (modalidades con al menos 3 casos).", "in": "Aseguradoras con más casos.", "ri": "Porcentaje de recupero por aseguradora (con al menos 5 casos).", "ow": "Propietarios o flotas con más vehículos robados.", "rw": "Propietarios o flotas con más casos todavía sin recuperar.", "pl": "Placas que aparecen más de una vez en el archivo (vehículos robados repetidamente).", "ta": "Vehículos que son taxi frente a los que no lo son."};
+DESC.comb='Casos según la combinación de dispositivos instalados: solo GPS, GPS junto con LOJACK o DETEKTOR, y las tecnologías sin GPS.';
+const CH={},base={chart:{background:'transparent',toolbar:{show:false},fontFamily:'Inter,sans-serif',height:300,width:'100%'},theme:{mode:'dark'},grid:{borderColor:'#243044'},dataLabels:{enabled:false},legend:{fontSize:'11px'}};
+function chart(v,id,t,o,full){const box=$('c_'+v);if(!$('c_'+id)){box.insertAdjacentHTML('beforeend',`<div class="card" ${full?'style="grid-column:1/-1"':''}><p class="ct">${t}</p><p class="ds">${DESC[id]||''}</p><div id="c_${id}"></div></div>`)}
+ if(CH[id])CH[id].destroy();CH[id]=new ApexCharts($('c_'+id),{...base,...o,chart:{...base.chart,...o.chart}});CH[id].render()}
+const hb=(v,id,t,e,c)=>chart(v,id,t,{chart:{type:'bar'},series:[{name:'Casos',data:e.map(x=>x[1])}],xaxis:{categories:e.map(x=>x[0]),labels:{style:{fontSize:'10px'}}},colors:[c],plotOptions:{bar:{horizontal:true,borderRadius:5,barHeight:'70%'}}});
+const vb=(v,id,t,k,vals,c)=>chart(v,id,t,{chart:{type:'bar'},series:[{name:'Casos',data:vals}],xaxis:{categories:k,labels:{style:{fontSize:'10px'}}},colors:[c],plotOptions:{bar:{borderRadius:5,columnWidth:'70%'}}});
+const dn=(v,id,t,e,c)=>chart(v,id,t,{chart:{type:'donut'},labels:e.map(x=>x[0]),series:e.map(x=>x[1]),legend:{position:'bottom'},stroke:{width:0},...(c?{colors:c}:{}),dataLabels:{enabled:true}});
+const rateBy=(rows,f,n=10,min=3)=>{const t=count(rows,f),r=count(rows.filter(x=>x.recovered),f);return Object.keys(t).filter(k=>t[k]>=min).map(k=>[k,pct(r[k]||0,t[k])]).sort((a,b)=>b[1]-a[1]).slice(0,n)};
+const tkey=(r,sp)=>{const y=r.date.getFullYear(),m=String(r.date.getMonth()+1).padStart(2,'0');return sp>120?`${y}-${m}`:`${y}-${m}-${String(r.date.getDate()).padStart(2,'0')}`};
+
+/* ---------- vistas ---------- */
+const NAV=[['resumen','📊','Resumen e índices'],['mapa','📍','Mapa general'],['gps','📡','Mapa GPS unificado'],['tec','🔧','Tecnología'],['tiempos','⏱','Tiempos y horarios'],['zonas','🧭','Zonas y riesgo'],['veh','🚗','Vehículos y modalidades'],['datos','🗂','Datos y búsqueda']];
+$('rail').innerHTML=NAV.map(([k,i,t])=>`<button class="rb" data-v="${k}" data-t="${t}">${i}</button>`).join('')+'<div style="flex:1"></div><button class="rb" id="pal" data-t="Cambiar color">🎨</button>';
+document.querySelectorAll('.rb[data-v]').forEach(b=>b.onclick=()=>go(b.dataset.v));
+const ACS=['#2da8ff','#22c55e','#a855f7','#f59e0b','#f43f5e'];let ai=0;$('pal').onclick=()=>document.documentElement.style.setProperty('--ac',ACS[++ai%ACS.length]);
+try{M1=mkMap('map1',$('mb1'));M2=mkMap('map2',$('mb2'));M1.ap=$('ap1');M2.ap=$('ap2')}catch(e){$('fname').textContent='⚠ Mapas no disponibles (¿sin internet?): '+e.message;M1=M2={L:{},pts:[],m:{invalidateSize(){}}}}
+
+function go(v){CUR=v;document.querySelectorAll('.rb[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v===v));$('vt').textContent=NAV.find(n=>n[0]===v)[2];
+ document.querySelectorAll('.view').forEach(x=>x.classList.toggle('on',x.id==='v_'+v));if(!DATA.length)return;
+ const d=filt(),g=d.filter(r=>r.cls==='GPS');F={d,g};$('cnt').textContent=d.length.toLocaleString()+' registros';
+ setTimeout(()=>window.dispatchEvent(new Event('resize')),250);setTimeout(()=>window.dispatchEvent(new Event('resize')),900);
+ ({resumen,mapa:()=>{draw(M1,d,r=>r.recovered?'#10b981':'#ef4444')},gps,tec,tiempos,zonas,veh,datos})[v](d,g)}
+
+function resumen(d,g){const rec=d.filter(r=>r.recovered).length,gr=g.filter(r=>r.recovered).length,lj=d.filter(r=>r.cls==='LOJACK'),dk=d.filter(r=>r.cls==='DETEKTOR');
+ const hrs=Array(24).fill(0),dys=Array(7).fill(0);d.forEach(r=>{if(r.hour!=null){hrs[r.hour]++;r.date&&dys[r.date.getDay()]++}});const ph=Math.max(...hrs),pd=Math.max(...dys);
+ const dd=d.filter(r=>r.diff!=null),pl=topN(count(d,r=>r.plate),99999).filter(x=>x[1]>1),fr={'Madrugada':0,'Mañana':0,'Tarde':0,'Noche':0};d.forEach(r=>{if(r.hour!=null)fr[r.hour<6?'Madrugada':r.hour<12?'Mañana':r.hour<18?'Tarde':'Noche']++});const fk=topN(fr,1)[0];
+ const K=[['Incidentes',d.length,'#94a3b8'],['Recuperados',rec,'#10b981'],['En proceso',d.length-rec,'#f59e0b'],['Tasa de recupero',pct(rec,d.length)+'%','#2da8ff'],['Casos con GPS',g.length,'#22d3ee','GPS unificado'],['Recupero GPS',pct(gr,g.length)+'%','#06b6d4'],['Recupero LOJACK',pct(lj.filter(r=>r.recovered).length,lj.length)+'%','#f59e0b',lj.length+' casos'],['Recupero DETEKTOR',pct(dk.filter(r=>r.recovered).length,dk.length)+'%','#a78bfa',dk.length+' casos'],
+ ['Demora mediana denuncia',fmtM(med(dd.map(r=>r.diff))),'#06b6d4','robo → Hunter'],['Denuncia ≤30 min',pct(dd.filter(r=>r.diff<=30).length,dd.length)+'%','#22c55e'],['Denuncia >6 h',pct(dd.filter(r=>r.diff>360).length,dd.length)+'%','#ef4444'],['Tiempo recupero mediano',fmtM(med(d.filter(r=>r.trec!=null).map(r=>r.trec))),'#10b981'],
+ ['Hora pico',ph>0?hrs.indexOf(ph)+'h':'--','#f43f5e'],['Día pico',pd>0?DAYS[dys.indexOf(pd)]:'--','#a855f7'],['Franja crítica',fk&&fk[1]?fk[0]:'--','#ec4899',fk?pct(fk[1],d.length)+'% casos':''],['Propietarios distintos',Object.keys(count(d,r=>r.owner)).length,'#8b5cf6'],['Zonas afectadas',Object.keys(count(d,r=>r.zone)).length,'#3b82f6'],
+ ['Placas reincidentes',pl.length,'#f59e0b','robadas +1 vez'],['Taxis',pct(d.filter(r=>r.taxi).length,d.length)+'%','#eab308'],['Reconfirmados',pct(d.filter(r=>r.reconf).length,d.length)+'%','#14b8a6'],['Sin cía. seguros',pct(d.filter(r=>/SIN C/.test(r.ins)).length,d.length)+'%','#f87171'],['Mixtos GPS+otro',g.filter(r=>r.hybrid).length,'#8b5cf6'],['Meses en archivo',Object.keys(count(d,r=>r.month)).length,'#64748b']];
+ $('kp').innerHTML=K.map(([l,v,c,s])=>`<div class="k" style="--c:${c}"><p>${l}</p><div>${typeof v==='number'?v.toLocaleString():v}</div><small>${s||'&nbsp;'}</small></div>`).join('');
+ const z=topN(count(d,r=>r.zone),1)[0],zo=topN(count(d.filter(r=>!r.recovered),r=>r.zone),1)[0],md=topN(count(d,r=>r.mod),1)[0],mo=topN(count(d,r=>r.model),1)[0],gz=topN(count(g,r=>r.zone),1)[0],gs=topN(count(g,r=>r.tags),1)[0],bz=rateBy(d,r=>r.zone,1,5)[0],wz=Object.entries(count(d,r=>r.zone)).filter(x=>x[1]>=5).map(([k,t])=>[k,pct(d.filter(r=>r.zone===k&&r.recovered).length,t)]).sort((a,b)=>a[1]-b[1])[0];
+ const I=[['🔥 Zona dominante',z&&`${z[0]}: ${z[1]} incidentes (${pct(z[1],d.length)}%)`],['🚨 Mayor carga abierta',zo&&`${zo[0]}: ${zo[1]} casos en proceso`],['⚠ Modalidad líder',md&&`${md[0]} (${md[1]})`],['🚗 Modelo más robado',mo&&`${mo[0]} (${mo[1]})`],['📡 Subtipo GPS líder',gs&&`${gs[0]}: ${gs[1]} casos`],['📍 Hotspot GPS',gz&&`${gz[0]}: ${gz[1]} casos`],['✅ Mejor recupero (≥5)',bz&&`${bz[0]}: ${bz[1]}%`],['❌ Peor recupero (≥5)',wz&&`${wz[0]}: ${wz[1]}%`],['🔁 Reincidencia',pl[0]&&`${pl[0][0]} aparece ${pl[0][1]} veces`]];
+ $('ins').innerHTML=I.filter(x=>x[1]).map(([t,x])=>`<div class="card" style="padding:13px"><p class="ct" style="color:var(--ac)">${t}</p><b>${x}</b></div>`).join('');
+ const dates=d.filter(r=>r.date).map(r=>+r.date),sp=dates.length?(Math.max(...dates)-Math.min(...dates))/864e5:0,tr=count(d.filter(r=>r.date),r=>tkey(r,sp)),tg=count(g.filter(r=>r.date),r=>tkey(r,sp)),tk=Object.keys(tr).sort();
+ chart('resumen','trend','Evolución · total vs GPS',{chart:{type:'area'},series:[{name:'Total',data:tk.map(k=>tr[k])},{name:'GPS',data:tk.map(k=>tg[k]||0)}],xaxis:{categories:tk,labels:{rotate:-45,style:{fontSize:'10px'}}},stroke:{curve:'smooth',width:3},fill:{type:'gradient',gradient:{opacityFrom:.45,opacityTo:.03}},colors:['#2da8ff','#22d3ee']});
+ dn('resumen','st','Recuperado vs en proceso',[['RECUPERADO',rec],['EN PROCESO',d.length-rec]],['#10b981','#f59e0b'])}
+
+let GV='ALL';
+function gps(d,g){
+ const T = ['ALL', 'GPS BASE', 'GPS-PP', 'GPS 360', 'HUNTER PRO', 'GPS AMI', 'PP SECURITY', 'HUNTER TOYOTA', 'GL', 'GD', 'LOJACK', 'DETEKTOR', 'OTROS'];
+ const Lbl = {'ALL':'Todos', 'GPS BASE':'GPS BASE', 'GPS-PP':'GPS-PP', 'GPS 360':'GPS 360', 'HUNTER PRO':'HUNTER PRO', 'GPS AMI':'GPS AMI', 'PP SECURITY':'PP SECURITY', 'HUNTER TOYOTA':'HUNTER TOYOTA', 'GL':'GPS + LOJACK', 'GD':'GPS + DETEKTOR', 'LOJACK':'LOJACK', 'DETEKTOR':'DETEKTOR', 'OTROS':'OTROS'};
+ const Col = {'ALL':'#fff', 'GPS BASE':SUBC['GPS BASE'], 'GPS-PP':SUBC['GPS-PP'], 'GPS 360':SUBC['GPS 360'], 'HUNTER PRO':SUBC['HUNTER PRO'], 'GPS AMI':SUBC['GPS AMI'], 'PP SECURITY':SUBC['PP SECURITY'], 'HUNTER TOYOTA':SUBC['HUNTER TOYOTA'], 'GL':'#e879f9', 'GD':'#fb7185', 'LOJACK':CLSC.LOJACK, 'DETEKTOR':CLSC.DETEKTOR, 'OTROS':CLSC.OTROS};
+ 
+ const F2 = {ALL: () => true, 'GPS BASE': r => r.tags.includes('GPS BASE'), 'GPS-PP': r => r.tags.includes('GPS-PP'), 'GPS 360': r => r.tags.includes('GPS 360'), 'HUNTER PRO': r => r.tags.includes('HUNTER PRO'), 'GPS AMI': r => r.tags.includes('GPS AMI'), 'PP SECURITY': r => r.tags.includes('PP SECURITY'), 'HUNTER TOYOTA': r => r.tags.includes('HUNTER TOYOTA'), GL: r => r.gl, GD: r => r.gd, LOJACK: r => r.cls === 'LOJACK', DETEKTOR: r => r.cls === 'DETEKTOR', OTROS: r => r.cls === 'OTROS'};
+
+ const rows=d.filter(F2[GV]||F2.ALL);
+ const cnt=k=>d.filter(F2[k]).length;
+ 
+ draw(M2,rows,r=>r.gl?'#e879f9':r.gd?'#fb7185':r.cls==='GPS'?(SUBC[r.tags[0]]||'#22d3ee'):(CLSC[r.cls]||'#64748b'));
+ 
+ $('gv').innerHTML=T.map(k=>{
+  const c = cnt(k);
+  if(c === 0 && k !== 'ALL') return '';
+  return `<button class="chip ${GV===k?'on':''}" onclick="GV='${k}';go('gps')"><span style="color:${Col[k]};font-size:14px;margin-right:6px">●</span>${Lbl[k]} (${c})</button>`;
+ }).join('');
+ 
+ const rc=rows.filter(r=>r.recovered).length,sc=rows.filter(r=>!r.coords).length;
+ $('gk').innerHTML=[['En mapa',rows.length-sc,'#22d3ee'],['Recup.',rc,'#10b981'],['Abiertos',rows.length-rc,'#ef4444']].map(([l,v,c])=>`<div class="k" style="--c:${c};padding:8px;text-align:center"><p>${l}</p><div style="font-size:20px">${v}</div></div>`).join('')+`<div style="grid-column:1/-1;font-size:11px;color:var(--mu);line-height:1.5">Total del filtro: <b>${rows.length}</b>. Los casos con parpadeo siguen en proceso; los estáticos ya fueron recuperados.${sc?` <span style="color:#fbbf24">${sc} sin ubicación en el mapa.</span>`:''}</div>`;
+ 
+ const sct=count(g,r=>r.tags),sr=count(g.filter(r=>r.recovered),r=>r.tags);
+ $('gs').innerHTML=topN(sct).map(([k,v])=>`<div style="margin-bottom:12px"><div style="display:flex;justify-content:space-between;font-weight:700;font-size:11px"><span style="color:${SUBC[k]}">● ${k}</span><span>${v} · ${pct(sr[k]||0,v)}%</span></div><div class="bar"><i style="width:${pct(sr[k]||0,v)}%"></i></div></div>`).join('')||'<small>Sin casos GPS</small>';
+}
+
+function tec(d,g){const cl=topN(count(d,r=>r.cls));
+ dn('tec','comb','Combinaciones de tecnología',topN(count(d,r=>r.gl?'GPS + LOJACK':r.gd?'GPS + DETEKTOR':r.cls==='GPS'?'SOLO GPS':r.cls)),['#22d3ee','#e879f9','#f59e0b','#a78bfa','#fb7185','#64748b']);
+ dn('tec','cls','Tecnologías · GPS unificado vs resto',cl,cl.map(x=>CLSC[x[0]]));
+ chart('tec','rcls','Tasa de recupero por tecnología (%)',{chart:{type:'bar'},series:[{name:'% recupero',data:cl.map(x=>pct(d.filter(r=>r.cls===x[0]&&r.recovered).length,x[1]))}],xaxis:{categories:cl.map(x=>x[0])},colors:['#10b981'],plotOptions:{bar:{borderRadius:6,columnWidth:'45%'}}});
+ const sb=topN(count(g,r=>r.tags));chart('tec','sub','Subtipos dentro de GPS',{chart:{type:'bar'},series:[{name:'Casos',data:sb.map(x=>x[1])}],xaxis:{categories:sb.map(x=>x[0])},plotOptions:{bar:{distributed:true,borderRadius:5,columnWidth:'55%'}},colors:sb.map(x=>SUBC[x[0]]),legend:{show:false}});
+ hb('tec','rsub','Tasa de recupero por subtipo GPS (%)',rateBy(g,r=>r.tags,10,2),'#22d3ee');
+ hb('tec','open','Tecnologías en casos abiertos',topN(count(d.filter(r=>!r.recovered&&r.cls),r=>r.cls)),'#f59e0b');
+ hb('tec','devst','Estado del dispositivo (casos GPS)',topN(count(g,r=>r.devst),8),'#f43f5e');
+ hb('tec','devall','Estado del dispositivo (todas las tecnologías)',topN(count(d,r=>r.devst),8),'#ec4899');
+ const ms=[...new Set(d.map(r=>r.month))];chart('tec','cm','Tecnología por mes',{chart:{type:'bar',stacked:true},series:['GPS','LOJACK','DETEKTOR','OTROS'].map(c=>({name:c,data:ms.map(m=>d.filter(r=>r.month===m&&r.cls===c).length)})),xaxis:{categories:ms,labels:{rotate:-45,style:{fontSize:'10px'}}},colors:Object.values(CLSC)},1);
+ hb('tec','dz','Zonas con más casos GPS',topN(count(g,r=>r.zone)),'#22d3ee');hb('tec','raw','Dispositivos (texto original)',topN(count(d,r=>r.devRaw),10),'#6366f1')}
+
+function tiempos(d,g){const dates=d.filter(r=>r.date).map(r=>+r.date),sp=dates.length?(Math.max(...dates)-Math.min(...dates))/864e5:0,tr=count(d.filter(r=>r.date),r=>tkey(r,sp)),tk=Object.keys(tr).sort();
+ const hrs=Array(24).fill(0),hg=Array(24).fill(0),dys=Array(7).fill(0),mx=Array.from({length:7},()=>Array(24).fill(0)),Hh=[...Array(24).keys()].map(i=>String(i).padStart(2,'0')+'h');
+ d.forEach(r=>{if(r.hour!=null){hrs[r.hour]++;r.cls==='GPS'&&hg[r.hour]++;if(r.date){dys[r.date.getDay()]++;mx[r.date.getDay()][r.hour]++}}});
+ chart('tiempos','t2','Evolución temporal',{chart:{type:'area'},series:[{name:'Incidentes',data:tk.map(k=>tr[k])}],xaxis:{categories:tk,labels:{rotate:-45,style:{fontSize:'10px'}}},stroke:{curve:'smooth',width:3},fill:{type:'gradient',gradient:{opacityFrom:.45,opacityTo:.03}},colors:['#2da8ff']},1);
+ chart('tiempos','hr','Distribución por hora de denuncia',{chart:{type:'bar'},series:[{name:'Total',data:hrs},{name:'GPS',data:hg}],xaxis:{categories:Hh,labels:{style:{fontSize:'10px'}}},colors:['#0ea5e9','#22d3ee88'],plotOptions:{bar:{borderRadius:3,columnWidth:'75%'}}});
+ vb('tiempos','dy','Incidentes por día de semana',DAYS,dys,'#a78bfa');
+ chart('tiempos','mx','Matriz día × hora',{chart:{type:'heatmap'},series:DAYS.map((n,i)=>({name:n,data:mx[i].map((y,h)=>({x:Hh[h],y}))})),colors:['#ef4444'],xaxis:{labels:{style:{fontSize:'9px'}}}},1);
+ const rg=(f,keys,lim)=>{const o=Object.fromEntries(keys.map(k=>[k,0]));d.forEach(r=>{const m=r[f];if(m==null)return;o[lim.find(([x])=>m<=x)[1]]++});return o};
+ const df=rg('diff',['0-15 min','16-30 min','31-60 min','1-2 h','2-6 h','>6 h'],[[15,'0-15 min'],[30,'16-30 min'],[60,'31-60 min'],[120,'1-2 h'],[360,'2-6 h'],[1e12,'>6 h']]);
+ vb('tiempos','df','Demora robo → denuncia',Object.keys(df),Object.values(df),'#06b6d4');
+ const tc=rg('trec',['<1 h','1-6 h','6-24 h','1-3 d','3-7 d','>7 d'],[[60,'<1 h'],[360,'1-6 h'],[1440,'6-24 h'],[4320,'1-3 d'],[10080,'3-7 d'],[1e12,'>7 d']]);
+ vb('tiempos','tc','Tiempo hasta recupero',Object.keys(tc),Object.values(tc),'#10b981');
+ const fr=['Madrugada','Mañana','Tarde','Noche'],fv=[0,0,0,0];d.forEach(r=>{if(r.hour!=null)fv[r.hour<6?0:r.hour<12?1:r.hour<18?2:3]++});dn('tiempos','fr','Franjas horarias',fr.map((f,i)=>[f,fv[i]]),['#6366f1','#f59e0b','#ef4444','#0ea5e9']);
+ const ms=[...new Set(d.map(r=>r.month))];chart('tiempos','mr','Tasa de recupero por mes (%)',{chart:{type:'line'},series:[{name:'% recupero',data:ms.map(m=>pct(d.filter(r=>r.month===m&&r.recovered).length,d.filter(r=>r.month===m).length))}],xaxis:{categories:ms,labels:{rotate:-45,style:{fontSize:'10px'}}},stroke:{width:3,curve:'smooth'},markers:{size:4},colors:['#10b981']})}
+
+function zonas(d,g){const z={};d.forEach(r=>{if(!r.zone)return;const o=z[r.zone]=z[r.zone]||{t:0,r:0,g:0};o.t++;r.recovered&&o.r++;r.cls==='GPS'&&o.g++});
+ const E=Object.entries(z),mt=Math.max(...E.map(x=>x[1].t),1),mo=Math.max(...E.map(x=>x[1].t-x[1].r),1);
+ const R=E.map(([k,v])=>[k,v,Math.round((v.t/mt*.6+(v.t-v.r)/mo*.4)*100)]).sort((a,b)=>b[2]-a[2]);
+ $('zt').innerHTML='<tr><th>#</th><th>Zona</th><th>Total</th><th>Recup.</th><th>Abiertos</th><th>GPS</th><th>% recupero</th><th>Riesgo</th></tr>'+R.map(([k,v,s],i)=>`<tr><td>${i+1}</td><td><b>${k}</b></td><td>${v.t}</td><td>${v.r}</td><td>${v.t-v.r}</td><td>${v.g}</td><td><div class="bar"><i style="width:${pct(v.r,v.t)}%"></i></div>${pct(v.r,v.t)}%</td><td><span class="tag" style="background:${s>66?'#7f1d1d':s>33?'#78350f':'#064e3b'};color:#fff">${s}</span></td></tr>`).join('');
+ const zt=R.slice(0,10);chart('zonas','zs','Zonas críticas · recuperados vs en proceso',{chart:{type:'bar',stacked:true},series:[{name:'Recuperado',data:zt.map(x=>x[1].r)},{name:'En proceso',data:zt.map(x=>x[1].t-x[1].r)}],xaxis:{categories:zt.map(x=>x[0]),labels:{style:{fontSize:'10px'}}},colors:['#10b981','#ef4444'],plotOptions:{bar:{horizontal:true,borderRadius:4,barHeight:'70%'}}});
+ hb('zonas','zr','Tasa de recupero por zona (≥3 casos)',rateBy(d,r=>r.zone,10,3),'#10b981');hb('zonas','lr','Lugares de recupero',topN(count(d,r=>r.lrec),10),'#06b6d4');hb('zonas','zm','Modalidad dominante: zonas con asalto a mano armada',topN(count(d.filter(r=>/ARMADA/.test(r.mod)),r=>r.zone)),'#f43f5e')}
+
+function veh(d,g){hb('veh','md','Modelos más afectados',topN(count(d,r=>r.model)),'#ec4899');hb('veh','br','Marcas más afectadas',topN(count(d,r=>r.brand)),'#8b5cf6');
+ hb('veh','rm','Recupero por marca (≥5 casos)',rateBy(d,r=>r.brand,10,5),'#10b981');dn('veh','ty','Tipos de vehículo',topN(count(d,r=>r.type),8));dn('veh','mo','Modalidades de robo',topN(count(d,r=>r.mod),8));
+ hb('veh','rmo','Recupero por modalidad (≥3 casos)',rateBy(d,r=>r.mod,8,3),'#22c55e');hb('veh','in','Aseguradoras',topN(count(d,r=>r.ins)),'#3b82f6');hb('veh','ri','Recupero por aseguradora (≥5 casos)',rateBy(d,r=>r.ins,8,5),'#14b8a6');
+ hb('veh','ow','Propietarios / flotas más afectados',topN(count(d,r=>r.owner),10),'#8b5cf6');hb('veh','rw','Propietarios con más casos abiertos',topN(count(d.filter(r=>!r.recovered),r=>r.owner),10),'#f43f5e');hb('veh','pl','Placas reincidentes',topN(count(d,r=>r.plate),99999).filter(x=>x[1]>1).slice(0,10),'#f59e0b');hb('veh','ta','Taxi vs particular',[['TAXI',d.filter(r=>r.taxi).length],['NO TAXI',d.filter(r=>!r.taxi).length]],'#eab308')}
+
+function datos(d){$('dt').textContent=`${d.length.toLocaleString()} registros${Q?` para “${Q}”`:''} · mostrando ${Math.min(d.length,500)}`;
+ $('tb').innerHTML='<tr><th>Placa</th><th>Mes</th><th>Zona</th><th>Vehículo</th><th>Dispositivo</th><th>Modalidad</th><th>Aseguradora</th><th>Hora</th><th>Demora</th><th>Estado</th></tr>'+d.slice(0,500).map(r=>`<tr><td><b>${r.plate}</b></td><td>${r.month}</td><td>${r.zone}</td><td>${r.type} ${r.brand} ${r.model}</td><td><span class="tag" style="background:${CLSC[r.cls]||'#334155'}33;color:${CLSC[r.cls]||'#fff'}">${r.devRaw||'-'}</span></td><td>${r.mod}</td><td>${r.ins}</td><td>${r.hour!=null?String(r.hour).padStart(2,'0')+'h':'-'}</td><td>${r.diffTxt||'-'}</td><td><span class="tag" style="background:${r.recovered?'#064e3b':'#78350f'};color:#fff">${r.status||'-'}</span></td></tr>`).join('')}
+go('resumen');
+</script></body></html>
